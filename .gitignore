@@ -1,0 +1,9 @@
+# macOS metadata
+.DS_Store
+
+# Temporary files
+~*
+
+# Python temporary files
+__pycache__/
+*.py[cod]

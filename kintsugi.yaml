@@ -1,0 +1,151 @@
+# kintsugi.yaml — the canonical template's SHIPPED manifest (template vNEXT).
+# Copied verbatim at instantiation; `kintsugi adopt` then writes the lock.
+#
+# Enumeration doctrine (release checklist #1 — never from memory): every path
+# below was classified from `git ls-tree -r --name-only v3.9.2` (35 paths);
+# re-run that command against the new tag BEFORE every release, give every
+# NEW path a row or a legible absence, re-run the rename extraction
+# (`git log --diff-filter=R <prev>..<new>`), and bump version references.
+
+kintsugi_schema: 1
+
+canonical:
+  name: human-ai-collaboration-template
+  # present truth (checklist #6); if the repo is renamed at launch, the fix
+  # rides a patch tag — GitHub redirects hold the fleet meanwhile
+  remote: https://github.com/jlumbroso/human-ai-collaboration-template-A
+
+artifacts:
+  CLAUDE.md:
+    class: reconcile   # doctrine (checklist #5): untracked is for artifacts with no canonical ancestor; adapted descendants track and flag
+  justfile:
+    class: reconcile   # same doctrine. Release-planning note (Understudy, 2026-08-10): ~9 of 22 recipes become thin `pneumatic` shims when the package lands — that swap introduces a dependency and classifies MINOR (ADR-0023) on its day, consented piece-by-piece via the justfile piecer
+  .gitignore:
+    class: reconcile   # every repo appends locally; line-mode pieces serve it; flagging honest drift beats hiding it
+  README.md:
+    class: stencil
+  QUICK-START.md:
+    class: stencil
+  CHANGELOG.md:
+    class: stencil
+  docs/METHODOLOGY.md:
+    class: stencil
+  docs/adr/templates/adr.md:
+    class: stencil
+    marker: 'adr'
+  docs/adr/templates/adr-madr.md:
+    class: stencil
+    marker: 'adr-madr'
+  docs/adr/templates/seed.md:
+    class: stencil
+    marker: 'seed'
+  docs/adr/templates/debrief.md:
+    class: stencil
+    marker: 'debrief'
+  docs/adr/templates/failure-classes.md:
+    class: stencil
+    marker: 'failure-classes'
+  docs/adr/templates/AGENTS.md:
+    class: stencil     # doorway 1 (checklist #3)
+  docs/adr/AGENTS.md:
+    class: stencil     # doorway 2
+  docs/inbox/ONBOARDING.md:
+    class: stencil
+  docs/inbox/CONVENTIONS.md:
+    class: stencil
+  docs/inbox/ENCODING-MAP.md:
+    class: stencil
+  docs/inbox/INBOX-PROTOCOL.md:
+    class: stencil
+  .claude/skills/adr-authoring/SKILL.md:
+    class: stencil     # the v3.9.x taught surface
+  .claude/skills/adr-authoring/references/depth.md:
+    class: stencil
+  .claude/skills/adr-authoring/references/questions-reference.md:
+    class: stencil     # NEW at v3.10.0 (the ADR-0032 pairing's landing zone) — row added at assembly per this header's own enumeration doctrine; invisible to the v3.9.2 ls-tree above [Shipwright 5]
+  .claude/skills/adr-authoring/references/freshening.md:
+    class: stencil     # NEW at v3.11.0 but row MISSED until v3.11.2 — shipped in-tree, SKILL-referenced, undeliverable for two tags (Tender 5's dry-run catch, 2026-09-07): the enumeration doctrine violated in the same file that states it [Shipwright 5]
+  .claude/skills/adrs4ai-tooling/SKILL.md:
+    class: stencil     # NEW at v3.12.0 — row added AT assembly (the freshening lesson, learned): the toolchain-teaching skill, HQ ADR-0040 [Shipwright 5]
+  .claude/skills/adrs4ai-tooling/references/seats-models-and-usage-caps.md:
+    class: stencil     # NEW at v3.12.0 — the seats/models philosophy + cap tips (founder's argument, ADR-0040 It-2); row at assembly [Shipwright 5]
+  .claude/agent.env:
+    class: stencil     # asdf-shim boilerplate, template-maintained
+  .vscode/vscode-optimization-guide.md:
+    class: stencil
+  scripts/groups-lookup.py:
+    class: stencil     # backs the crew-layer recipes that STAY per Understudy's split (groups/crew are convention atop the registry, not pneumatic scope)
+  scripts/hooks/remind-uncommitted-substrate.py:
+    class: stencil     # dormant opt-in Stop hook; template-maintained
+  scripts/unwrap-adrs/README.md:
+    class: stencil
+  scripts/unwrap-adrs/unwrap-adrs.mjs:
+    class: stencil
+  scripts/unwrap-adrs/unwrap-adrs.py:
+    class: stencil
+  scripts/tmux/seat.conf:
+    class: stencil     # load-bearing for `just launch` TODAY (Grafter's hard-fail specimen, 2026-08-14: a missing copy broke Jérémie's launch; this row makes that failure class self-healing via missing-local → create); retires to pneumatic's external row when the package absorbs tmux config — Understudy's scope-call, minor bump on its day
+
+  # pneumatic — wake/messaging/registry machinery; arrives via PyPI, never via
+  # file-propagation. Visibility-only row: kintsugi reports it, never touches
+  # it. (Owner's reasoning, Understudy 2026-08-10: pneumatic's founding already
+  # excluded the vendored scripts on the theory that depending on the real
+  # package is the migration path — if this manifest didn't know that, kintsugi
+  # would reconcile the vendored copies forever, propagating exactly the
+  # disease pneumatic is the cure for.)
+  pneumatic:
+    class: external
+    dist: adrs4ai-pneumatic   # unpinned until a real release exists (a floor now would be aspirational)
+
+# Deliberately UNTRACKED — legible absences (enumeration doctrine: every path
+# gets a row or a reason):
+#   scripts/blame.py, scripts/last-message.py, scripts/refresh-terminals.py —
+#     vendored pneumatic precursors (ruling 2026-08-10): transition state, not
+#     template artifacts; the external row above is their forwarding address.
+#     (seat.conf was originally in this list; a field hard-fail specimen argued
+#     it into a stencil row above — amendment 2026-08-14, the ruling's honest
+#     quarter-retraction on the one file that is config-not-logic.)
+#   docs/inbox/agent-sessions.json — the LIVE crew registry, seeded once at
+#     instantiation and never propagated: it is the repo's own state, and a
+#     propagation surface here would be an instruction to overwrite a crew.
+#   .claude/settings.json, .vscode/settings.json, .mcp.json — settings sync
+#     arrives with the JSON piecer + permission/secret gates (kintsugi
+#     ADR-0005); tracking them as stencils today would flag-or-clobber
+#     permission grants. Absence is the safe truth until the gates exist.
+#   docs/adr/.gitkeep — directory keeper; rides instantiation, not updates.
+#   LICENSE, TEMPLATE-OUTPUT-GRANT.md — license-affecting artifacts: a row
+#     here would make template updates the vector for licensing changes
+#     across the fleet, whose per-repo license posture is exactly the open
+#     census in HQ ADR-0033 (Covenant's lane, gated on Jérémie). License
+#     artifacts travel by Covenant's rulings, never by file-propagation;
+#     if a ruling wants the grant delivered mechanically, that becomes a
+#     row with a class chosen in their lane, on the record. (Gap found by
+#     Tender 5's §1b release check, 2026-09-11 — entries added v3.11.4.)
+
+renames:                    # canonical facts, verbatim (checklist #4); re-extract before each tag
+  "3.9.0":
+    docs/adr/templates/template.md: docs/adr/templates/adr-madr.md
+    docs/adr/templates/collab-adr-lean.md: docs/adr/templates/adr.md
+    docs/adr/templates/debrief-template.md: docs/adr/templates/debrief.md
+    docs/adr/templates/seed-template.md: docs/adr/templates/seed.md
+
+features:                   # labels only in v0
+  crew-layer:
+    - docs/inbox/ONBOARDING.md
+    - docs/inbox/CONVENTIONS.md
+    - docs/inbox/ENCODING-MAP.md
+    - docs/inbox/INBOX-PROTOCOL.md
+
+# ═══ kintsugi: local zone ═══ everything below is this repo's own; updates never touch it
+
+journal:
+  path: TEMPLATE-UPDATES.md
+  enabled: true
+
+overrides: {}
+# PLACEHOLDER — delete when adapting: an override example, for repos that
+# deliberately divorce an artifact (legible absence over silent divergence):
+#   overrides:
+#     README.md:
+#       skip: true
+#       reason: "this repo's front door is its own product, not the template's"

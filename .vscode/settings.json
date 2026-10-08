@@ -1,0 +1,115 @@
+{
+    // ADR Manager: in-repo (committed) override turning diagnostic
+    // logging on for this workspace (2026-08-25, "set it everywhere" —
+    // same override as HQ and every other subproject).
+    "adrManager.logging.observations": true,
+    "adrManager.logging.panelErrors": true,
+    "adrManager.logging.tourUnresolvedRefs": true,
+    "adrManager.reportButton.enabled": true,
+    "adrManager.humanName": "Jérémie Lumbroso",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#57bfc4",
+        "activityBar.background": "#57bfc4",
+        "activityBar.foreground": "#15202b",
+        "activityBar.inactiveForeground": "#15202b99",
+        "activityBarBadge.background": "#bd42b7",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "commandCenter.border": "#15202b99",
+        "sash.hoverBorder": "#57bfc4",
+        "statusBar.background": "#3ca7ac",
+        "statusBar.foreground": "#15202b",
+        "statusBarItem.hoverBackground": "#2f8286",
+        "statusBarItem.remoteBackground": "#3ca7ac",
+        "statusBarItem.remoteForeground": "#15202b",
+        "titleBar.activeBackground": "#3ca7ac",
+        "titleBar.activeForeground": "#15202b",
+        "titleBar.inactiveBackground": "#3ca7ac99",
+        "titleBar.inactiveForeground": "#15202b99"
+    },
+    "peacock.color": "#3CA7AC",
+    "python.terminal.activateEnvironment": false,
+    "terminal.integrated.env.osx": {
+        "PATH": "/opt/homebrew/bin:${env:HOME}/.asdf/shims:${env:PATH}"
+    },
+    /* Claude Code configuration */
+    "claudeCode.environmentVariables": [
+        {
+            "name": "PATH",
+            "value": "/opt/homebrew/bin:${env:HOME}/.asdf/shims:${env:HOME}/.poetry/bin:${env:HOME}/.local/bin:/opt/homebrew/Caskroom/mambaforge/base/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        },
+        {
+            "name": "ASDF_DIR",
+            "value": "/opt/homebrew/opt/asdf/libexec"
+        },
+        {
+            "name": "NODE_PATH",
+            "value": "/opt/homebrew/lib/node_modules"
+        }
+    ],
+    // Terminal configuration
+    // Core VSCode integrations
+    "terminal.integrated.shellIntegration.enabled": false,
+    "terminal.integrated.shellIntegration.decorationsEnabled": "never",
+    "terminal.integrated.gpuAcceleration": "off",
+    "terminal.integrated.smoothScrolling": false,
+    // Links and detection
+    "terminal.integrated.enableFileLinks": "on",
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    // Suggestions and autocomplete
+    "terminal.integrated.suggest.enabled": false,
+    "terminal.integrated.sendKeybindingsToShell": false,
+    // Tabs and UI
+    "terminal.integrated.tabs.enabled": true,
+    "terminal.integrated.tabs.hideCondition": "never",
+    "terminal.integrated.tabs.showActions": "never", // no split/kill buttons on tabs on hover
+    "terminal.integrated.tabs.enableAnimation": false, // no animation in tab titles
+    "terminal.integrated.tabs.title": "${sequence}", // tmux/OSC-0 title sequences drive the tab label (session-continuity: just launch/wake)
+    // Persistence
+    "terminal.integrated.enablePersistentSessions": false,
+    "terminal.integrated.persistentSessionReviveProcess": "never",
+    // Environment tracking
+    "terminal.integrated.environmentChangesIndicator": "off",
+    "terminal.integrated.environmentChangesRelaunch": false,
+    // Rendering optimizations
+    "terminal.integrated.fontLigatures": false,
+    "terminal.integrated.cursorBlinking": false,
+    "terminal.integrated.cursorSmoothCaretAnimation": "off",
+    "terminal.integrated.customGlyphs": false,
+    "terminal.integrated.drawBoldTextInBrightColors": false,
+    // Accessibility (if you don't need it)
+    "terminal.integrated.accessibleViewPreserveCursorPosition": false,
+    // ── One assistant, deliberately: the ambient-AI chorus, off ──
+    // (Not anti-AI — this methodology IS thinking with AI. It is anti-AMBIENT:
+    //  autocomplete whispering at every keystroke is steering you never chose,
+    //  and it reads as authority exactly in proportion to how new you are.
+    //  The collaborator is invited on purpose, in a terminal, every time —
+    //  no exceptions, including Anthropic's own editor integrations.
+    //  Founder's doctrine, 2026-09; teaching: the adrs4ai-tooling skill.)
+    "chat.disableAIFeatures": true,
+    "chat.agent.enabled": false,
+    "workbench.commandPalette.showAskInChat": false,
+    "workbench.browser.enableChatTools": false,
+    "github.copilot.editor.enableAutoCompletions": false,
+    "github.copilot.chat.terminalContext": "off",
+    "github.copilot.enable": {
+        "*": false
+    },
+    // ── Quiet the chrome: every element you don't use crowds a thought ──
+    // (With 4–8 project windows open, every frame must be lightweight.)
+    "window.commandCenter": false,
+    "workbench.navigationControl.enabled": false,
+    "workbench.layoutControl.enabled": false,
+    "workbench.startupEditor": "none",
+    "workbench.notifications.showInTitleBar": false,
+    "workbench.enableExperiments": false,
+    "terminal.integrated.initialHint": false,
+    "update.mode": "manual",
+    "editor.hover.enabled": "off", // Avoid hover messages, especially in terminal
+    "workbench.hover.enabled": false,
+    "terminal.integrated.showLinkHover": false,
+    "terminal.integrated.hover.enabled": false,
+    "debug.inlineValues": "off",
+    "editor.hover.above": false,
+    "editor.autoClosingBrackets": "never",
+    "editor.autoClosingQuotes": "never"
+}

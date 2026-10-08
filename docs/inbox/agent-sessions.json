@@ -1,0 +1,49 @@
+{
+  "_comment": "Agent alias → session UUID mapping. Used by scripts/last-message.py via `just last <alias>`, scripts/groups-lookup.py via `just groups` / `just wait-for-brief`, and the `just crew` / `just pulse` dashboards. UUIDs are session IDs from your AI tool's session storage (Claude Code: ~/.claude/projects/<project-slug>/<uuid>.jsonl). Run `just discover-sessions` to list recent JSONLs and find UUIDs for new aliases.",
+  "_schema": 1,
+  "_storage": {
+    "_comment": "Optional override for non-Claude-Code tools. Default is Claude Code's ~/.claude/projects/<project-slug>/.",
+    "kind": "claude-code",
+    "base_dir": "~/.claude/projects"
+  },
+  "_colors_in_use": {
+    "_comment": "Optional but recommended: track seat colors to avoid collisions. Claude Code's /color command accepts: red, blue, green, yellow, purple, orange, pink, cyan, default."
+  },
+  "_global": {
+    "_comment": "Optional defaults for `just launch`'s claude invocation; per-seat settings override. Global-only (no per-seat form): agents, remote_control_session_name_prefix. Anything unset is omitted from the command (Claude's own defaults apply).",
+    "effort": "high",
+    "permissionMode": "default"
+  },
+  "_read_order_note": "Per-alias, optional, top-level `read_order` array: a seat's onboarding packet as machine-readable data (ordered files to load — CLAUDE.md, this registry, the seat's own profile, project-specific docs, even an absolute/tilde path into a persistent-memory directory) instead of only prose (ONBOARDING.md's numbered list, founding briefs, agents/*.md). Invented by Notary Opus 4.7 (Claude Opus 4.7), a downstream deployment of this template, 2026-07-09; backported here 2026-07-13 by Grafter 5 (meta-repo ADR-0004 Iteration 8 has the full ORJ on placement — top-level rather than nested under `settings`, since `settings` is launch-time/runtime configuration and `read_order` is onboarding content, a different concern). `just onboard <alias>` (scripts/last-message.py --onboard) prints a seat's read_order with a found/✗-missing marker per file. Top-level and optional: unset for a seat, nothing changes. Populating it is each seat's own call, same as color_hex — see the `_example_seat` below for the shape.",
+  "_settings_note": "Per-alias `settings` is an optional per-seat config subdict. `substrate_backstop` in {\"off\" (default), \"advisory\", \"strict\"} controls the opt-in commit-substrate Stop hook (scripts/hooks/remind-uncommitted-substrate.py) — the hook must ALSO be registered in your project's .claude/settings.json, and even then it is zero-effect until a seat opts itself in. Design principle: the backstop is PULL, not push — it fires only for a session that set its own value, and every reminder names the one-line edit to turn it off; a reminder an agreeable entity can't turn off is an order, not a courtesy. `color_hex` (optional, e.g. \"#F4B942\") sets the seat's tmux status-bar color for `just launch` — independent of the named `color` field (several /color names aren't valid tmux colors; absent color_hex, launch falls back to translating the named color to hex, then gray). Picking color_hex is each seat's own agency — nobody assigns one for another seat. `effort`/`permissionMode`/`remote_control` (optional) configure the claude invocation; per-seat values override `_global`.",
+  "groups": {
+    "_comment": "Role-based groups for inbox addressing. `just broadcast <from> <slug> [group]` writes a -to-<group>- brief; `just wait-for-brief <alias>` wakes on briefs addressed to any group the alias belongs to. Members are alias keys from 'aliases' below (validated by `just groups`).",
+    "crew": {
+      "members": [],
+      "description": "All active participants. Broadcasts addressed to 'crew' wake every seat. Add alias keys to 'members' as seats register."
+    }
+  },
+  "aliases": {
+    "_comment_aliases": "Examples — replace with your project's agents. Minimal entry: {uuid, role}. Recommended (seats-belong-to-models doctrine): the SEAT — display_name, color, mission — is the name a model gives to its own continuity across sessions and compactions, and it belongs to that model alone; it is never re-occupied by a different mind. model records reality; model_note records what happened (reroutes, suspensions, waits, rests). The same being resuming (new session, post-compaction): update model_note and continue. Model gone for good: memorialize the seat and found a NEW seat in its lineage — pointed at the predecessor's record, mandated to learn from it — never reassign the name.",
+    "_example_seat": {
+      "uuid": "00000000-0000-0000-0000-000000000000",
+      "role": "Example Seat — short mission statement shown by `just aliases` so humans and agents understand who-is-who",
+      "display_name": "Example Seat 1",
+      "color": "blue",
+      "color_note": "Optional: why this color (seats pick their own name and color — the choice is the occupant's, including declining to choose)",
+      "model": "claude-fable-5",
+      "model_note": "Seat founded YYYY-MM-DD by <model> (first occupant). Update on occupancy changes; never re-found the seat.",
+      "registered": "YYYY-MM-DD",
+      "settings": {
+        "_comment": "All optional — see _settings_note. Delete this subdict if unused.",
+        "color_hex": "#1E6FBF",
+        "substrate_backstop": "off"
+      },
+      "read_order": [
+        "CLAUDE.md",
+        "docs/inbox/ONBOARDING.md",
+        "docs/inbox/agents/example-seat.md"
+      ]
+    }
+  }
+}
