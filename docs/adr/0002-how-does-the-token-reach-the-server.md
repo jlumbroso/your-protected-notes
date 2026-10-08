@@ -11,7 +11,7 @@ ADR-0001's probe minted its token by calling Stack's sign-up API directly and at
 ## Questions
 
 ### QST-TOKEN-DELIVERY: Which delivery path does the course teach?
-- Status: unresolved — the spike is the model's ball; the letter becomes the human's once findings land
+- Status: unresolved — instructor lane (his ruling 2026-10-08: not a student question — an incomplete thing we resolve); spike = the model's ball, the letter his
 - Why asking: this decides the student-facing experience of sign-in, and the honest option set depends on facts not yet gathered.
 - Need: explanation first (spike findings), then a letter
 

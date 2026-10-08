@@ -1,0 +1,17 @@
+# One-click deploy: https://render.com -> New -> Blueprint -> this repo.
+# Free tier sleeps when idle; first call after a nap takes ~30s.
+services:
+  - type: web
+    name: your-protected-notes
+    runtime: python
+    plan: free
+    # mcp<2 pin in BOTH places (buildCommand bypasses pyproject) — lineage lesson from your-first-memory.
+    buildCommand: pip install "mcp[cli]>=1.2,<2" "psycopg[binary]>=3.1" "PyJWT[crypto]>=2.8"
+    startCommand: python server.py
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: NEON_AUTH_JWKS_URL
+        sync: false
+      - key: STACK_PROJECT_ID
+        sync: false
