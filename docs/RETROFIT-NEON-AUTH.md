@@ -38,9 +38,9 @@ already was in fact. (Decide with your human whether that is acceptable or
 whether old rows should be claimed by their owner / archived.)
 
 **4. Add identity resolution to the server** — copy `current_identity()`
-from this repo's `server.py`. The contract (ADR-0004): absent token →
+from this repo's `server.py`. The contract (ADR-0001 D4): absent token →
 `(None, None)` = guest; valid token → `(sub, email)`; invalid token →
-raise. Key on `sub`, never email (ADR-0001).
+raise. Key on `sub`, never email (ADR-0001 D1).
 
 **5. Thread `user_id` through every query.**
 Reads: `WHERE user_id IS NOT DISTINCT FROM %s` (NULL-safe equality — plain
@@ -54,7 +54,7 @@ after this one.
 **7. Test the three modes** before telling anyone it works:
 no header → guest; a real token (see this repo's `scripts/mint-test-token`
 pattern) → your email; a garbled token → an error, NOT guest. If the third
-check comes back "guest," stop: you have the silent-misfiling bug ADR-0004
+check comes back "guest," stop: you have the silent-misfiling bug ADR-0001 D4
 exists to prevent.
 
 **8. Write YOUR ADR.** You just made real decisions (commons vs. claim for

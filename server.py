@@ -38,7 +38,7 @@ mcp = FastMCP(
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS notes (
     petname  CHAR(4) NOT NULL,
-    user_id  TEXT,                              -- NULL = the guest commons (ADR-0002)
+    user_id  TEXT,                              -- NULL = the guest commons (ADR-0001 D2)
     note     TEXT NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -65,10 +65,10 @@ def petname():
 def current_identity(ctx: Context):
     """Resolve the caller: (user_id, email) or (None, None) for a guest.
 
-    ABSENT token  -> guest (a mode, not an error — ADR-0004).
+    ABSENT token  -> guest (a mode, not an error — ADR-0001 D4).
     INVALID token -> raises (an invalid credential must never silently
                      degrade to guest: that would hide broken auth as
-                     working anonymity — ADR-0004's whole point).
+                     working anonymity — ADR-0001 D4's whole point).
     """
     request = getattr(ctx.request_context, "request", None)  # starlette Request under streamable-http
     auth = request.headers.get("authorization", "") if request is not None else ""
@@ -85,7 +85,7 @@ def current_identity(ctx: Context):
         audience=STACK_PROJECT_ID or None,
         options={"verify_aud": bool(STACK_PROJECT_ID)},
     )
-    user_id = claims["sub"]                      # the identity (ADR-0001)
+    user_id = claims["sub"]                      # the identity (ADR-0001 D1)
     email = None
     with db() as conn, conn.cursor() as cur:     # display only, never the key
         cur.execute("SELECT email FROM neon_auth.users_sync WHERE id = %s", (user_id,))
@@ -109,7 +109,7 @@ def add_note(note: str, ctx: Context) -> str:
     """Keep a note. Guests write to the commons; users to their own shelf."""
     user_id, _ = current_identity(ctx)
     with db() as conn, conn.cursor() as cur:
-        for _ in range(5):                      # 5 collision retries ≈ never fails (ADR-0003)
+        for _ in range(5):                      # 5 collision retries ≈ never fails (ADR-0001 D3)
             try:
                 p = petname()
                 cur.execute("INSERT INTO notes (petname, user_id, note) VALUES (%s, %s, %s)",
