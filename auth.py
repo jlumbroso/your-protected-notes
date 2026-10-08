@@ -26,6 +26,10 @@ ISSUER = os.environ.get("PUBLIC_URL", "https://your-protected-notes.onrender.com
 STACK_PROJECT_ID = os.environ.get("STACK_PROJECT_ID", "")
 STACK_PUB_CLIENT_KEY = os.environ.get("STACK_PUB_CLIENT_KEY", "")
 
+GUEST_TOKEN = "guest-no-shelf"   # a DECLARED guest credential: completes the
+# OAuth dance for users who choose the commons; server.py maps it to guest
+# mode explicitly (distinct from absent AND from invalid — ADR-0004 holds).
+
 _codes: dict = {}     # code -> {tokens, code_challenge, redirect_uri, client_id, exp}
 _clients: dict = {}   # client_id -> {redirect_uris}
 
@@ -64,6 +68,7 @@ button{{border:none;background:#1E4D2B;color:#fff;font-weight:bold;cursor:pointe
 <input name="password" type="password" placeholder="password" required>
 <button name="mode" value="signin" type="submit">Sign in</button>
 <button name="mode" value="signup" type="submit" class="alt">New here — sign up</button>
+<button name="mode" value="guest" type="submit" class="alt" formnovalidate style="border-style:dashed;color:#777;border-color:#999">Continue as guest — shared commons</button>
 </form></div></body></html>"""
 
 
@@ -123,6 +128,17 @@ def register_oauth_routes(mcp):
         params = {k: urllib.parse.unquote(form.get(k, "")) for k in
                   ("client_id", "redirect_uri", "state", "code_challenge",
                    "code_challenge_method", "response_type", "scope", "resource")}
+        if form.get("mode") == "guest":
+            code = secrets.token_urlsafe(24)
+            _codes[code] = {"tokens": {"access_token": GUEST_TOKEN, "refresh_token": GUEST_TOKEN},
+                            "code_challenge": params["code_challenge"],
+                            "redirect_uri": params["redirect_uri"],
+                            "client_id": params["client_id"],
+                            "exp": time.time() + 300}
+            sep = "&" if "?" in params["redirect_uri"] else "?"
+            return RedirectResponse(
+                f'{params["redirect_uri"]}{sep}code={code}&state={urllib.parse.quote(params["state"], safe="")}',
+                status_code=302)
         email, password = form.get("email", ""), form.get("password", "")
         path = "/auth/password/sign-up" if form.get("mode") == "signup" else "/auth/password/sign-in"
         payload = {"email": email, "password": password}
@@ -165,6 +181,9 @@ def register_oauth_routes(mcp):
                                  "token_type": "bearer", "expires_in": 3600,
                                  "refresh_token": t.get("refresh_token", "")})
         if grant == "refresh_token":
+            if form.get("refresh_token", "") == GUEST_TOKEN:
+                return JSONResponse({"access_token": GUEST_TOKEN, "token_type": "bearer",
+                                     "expires_in": 31536000, "refresh_token": GUEST_TOKEN})
             try:
                 t = _stack("/auth/sessions/current/refresh", payload={},
                            headers={"X-Stack-Refresh-Token": form.get("refresh_token", "")})

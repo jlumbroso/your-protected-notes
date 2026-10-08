@@ -75,6 +75,8 @@ def current_identity(ctx: Context):
     if not auth.lower().startswith("bearer "):
         return None, None
     token = auth.split(None, 1)[1]
+    if token == "guest-no-shelf":      # the declared-guest credential (auth.py GUEST_TOKEN)
+        return None, None              # chosen commons — a mode, never an error
     import jwt as pyjwt
     from jwt import PyJWKClient
     if not JWKS_URL:
