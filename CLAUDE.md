@@ -1,9 +1,9 @@
 # CLAUDE.md - Project Guidance
 
-- **Project**: [Project Name]
-- **Human**: [Human collaborator(s)]
-- **AI**: [AI participant(s) — with the crew layer, the roster lives in docs/inbox/agent-sessions.json; name the coordinator seat here]
-- **Last Updated**: [Date]
+- **Project**: **your-protected-notes** — minimal Neon Auth + MCP prototype: one server, guest/user modes, notes with Crockford-Base32 petnames. Spike for CAM (CIS 7000, Penn, Fall 2026) session 7.
+- **Human**: Jérémie Lumbroso
+- **AI**: Lapidary 5 (Claude Fable 5) — visiting builder from cam-hq; single seat, no crew layer
+- **Last Updated**: 2026-10-08 (v2 — instantiated server-side from the template so GitHub records paternity; v1 of this work: jlumbroso/your-protected-notes-first-draft)
 
 ---
 
@@ -242,10 +242,10 @@ If the script was successfully used, append as comments how, and what the outcom
 ## Project Context
 
 ### What we're building:
-[1-2 sentences describing the project goal]
+The smallest honest demonstration that a student's MCP server can tell WHO is asking. Newcomers: read docs/adr/0001-* first — it is the self-contained account of what this is, the technologies it stands on, and every decision with its road not taken.
 
 ### Current focus:
-[What's being worked on right now]
+Verification path proven live 2026-10-08 (see the probe script and its OUTCOME note). Open: token delivery from claude.ai (ADR-0002).
 
 ### Key decisions made:
 - [Decision 1] - See `docs/adr/0001-*.md`
