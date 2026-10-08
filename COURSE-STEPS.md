@@ -42,10 +42,17 @@ Blueprint → your fork; paste `DATABASE_URL`, `NEON_AUTH_JWKS_URL`, and
 1. Connect your Claude (no sign-in yet) and ask: *"what's my user status?"*
    — **guest**. Add a note. Your neighbor, also a guest, can see it:
    you're on the shared commons.
-2. Sign in (your instructor will show the token step for your setup —
-   see [docs/adr/0002](docs/adr/0002-how-does-the-token-reach-the-server.md)
-   for why this step is still ours to smooth). Ask again: **user**, with
-   your email. Add a note. Your neighbor *cannot* see this one.
+2. Sign in — the server runs its own OAuth now. When ADDING the
+   connector, two overrides matter:
+   - Authentication: claude.ai will say "No sign-in — **Detected**".
+     Override to **Sign in now** (this server is polite to guests, so it
+     must be told to ask).
+   - OAuth client: **Register automatically (DCR)**.
+   The server's own login page opens (sign in, or "New here — sign up").
+   **Timeouts**: the free-tier server naps — the first load can take
+   ~1 minute (retry once); finish the login within 5 minutes (codes
+   expire); afterwards renewal is automatic. Then ask again: **user**,
+   with your email. Add a note. Your neighbor *cannot* see this one.
 3. That one-minute contrast — commons vs. shelf — is what authentication
    *is*. Everything else is machinery in its service.
 
