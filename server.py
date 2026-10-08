@@ -149,5 +149,8 @@ def clear_notes(ctx: Context) -> str:
     return f"Cleared {n} note(s) from {shelf}."
 
 
+from auth import register_oauth_routes  # OAuth AS endpoints (ADR-0002 iter. 3)
+register_oauth_routes(mcp)
+
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")
