@@ -8,6 +8,17 @@
 
 ADR-0001's probe minted its token by calling Stack's sign-up API directly and attaching it by hand. A real user doesn't do that. claude.ai custom connectors obtain tokens via **OAuth 2.1**: the server advertises protected-resource metadata (RFC 9728) naming its authorization server; the client discovers it, registers (ideally via dynamic client registration, RFC 7591), and runs the sign-in flow in the browser. Every link in that chain depends on what Stack Auth's endpoints actually expose — which is documented for their SDKs, not for this dance. Guessing would be worse than useless: an auth path that *almost* works teaches students that auth is mysterious, which is the opposite of this repo's point.
 
+## Iteration 2 — deployment findings (2026-10-08, same day)
+
+Deployed live: `https://your-protected-notes.onrender.com/mcp` (Render free
+tier, via the Render MCP once its credential was fixed). The three-mode
+probe passes against the deployed URL, and the guest commons showed the
+notes written hours earlier from a *local* process — the database outlives
+the server across machines, which is the course's thesis made visible.
+**Option B is therefore proven on real infrastructure** (Stack sign-up →
+token → Bearer header → private shelf). Option A's spike (RFC 9728
+metadata + Stack discovery/DCR posture) remains the open work.
+
 ## Questions
 
 ### QST-TOKEN-DELIVERY: Which delivery path does the course teach?
