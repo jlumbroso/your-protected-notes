@@ -20,7 +20,9 @@ import psycopg
 from mcp.server.fastmcp import Context, FastMCP
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
-JWKS_URL = os.environ.get("NEON_AUTH_JWKS_URL")   # from `provision_neon_auth` / Neon console
+NEON_AUTH_BASE_URL = os.environ.get("NEON_AUTH_BASE_URL", "").rstrip("/")  # better_auth mode
+JWKS_URL = os.environ.get("NEON_AUTH_JWKS_URL") or (
+    NEON_AUTH_BASE_URL + "/.well-known/jwks.json" if NEON_AUTH_BASE_URL else None)
 # The Stack project id is embedded in the JWKS URL (.../projects/<id>/...).
 # Students could never find it in the console (it hides in SDK snippets), so
 # we derive it — one less thing to copy (known-problems #10).
@@ -87,16 +89,27 @@ def current_identity(ctx: Context):
         raise RuntimeError("NEON_AUTH_JWKS_URL is not set — see README step 1.")
     signing_key = PyJWKClient(JWKS_URL).get_signing_key_from_jwt(token)
     claims = pyjwt.decode(
-        token, signing_key.key, algorithms=["ES256", "RS256"],
+        token, signing_key.key, algorithms=["EdDSA", "ES256", "RS256"],   # better_auth signs EdDSA
         audience=STACK_PROJECT_ID or None,
         options={"verify_aud": bool(STACK_PROJECT_ID)},
     )
     user_id = claims["sub"]                      # the identity (ADR-0001 D1)
-    email = None
-    with db() as conn, conn.cursor() as cur:     # display only, never the key
-        cur.execute("SELECT email FROM neon_auth.users_sync WHERE id = %s", (user_id,))
-        row = cur.fetchone()
-        email = row[0] if row else None
+    email = claims.get("email")                  # better_auth carries it in-claim
+    if not email:
+        # Display-only lookup; MUST NOT break the tool. Stack syncs
+        # neon_auth.users_sync; Better Auth keeps native tables — its user
+        # table is neon_auth."user" (users_sync does not exist there).
+        for q in ('SELECT email FROM neon_auth.users_sync WHERE id = %s',
+                  'SELECT email FROM neon_auth."user" WHERE id = %s'):
+            try:
+                with db() as conn, conn.cursor() as cur:
+                    cur.execute(q, (user_id,))
+                    row = cur.fetchone()
+                    if row:
+                        email = row[0]
+                        break
+            except Exception:
+                continue
     return user_id, email
 
 

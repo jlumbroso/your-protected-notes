@@ -25,32 +25,28 @@ have to agree with the decisions; you have to be able to find them.
 ## 2. Get your database + enable Neon Auth
 
 1. neon.tech → your project (**reuse level 2's** — auth attaches to the
-   database you already have). In the sidebar: **Auth** → enable, with
-   provider **Stack** (Stack Auth is the identity service Neon wires in:
-   it stores your users, checks their passwords, signs their tokens).
-2. Notice the new `neon_auth.users_sync` table in your database: your
-   user list, synced *into* your own Postgres. You never write it; you
-   may JOIN it (that's how `user_status` shows an email).
-3. The Auth page now shows everything you'll copy in step 3. In plain
-   words:
+   database you already have) → **Auth** → enable. Neon provisions
+   **Managed Better Auth**: a Neon-hosted login service wired to your
+   database, which becomes the source of truth (your users are real rows
+   — `SELECT * FROM neon_auth."user"` works).
+2. The Auth → **Configuration** page shows **one URL**. That's all you
+   copy from here:
 
 | Variable | What it actually is | Where to copy it |
 |---|---|---|
-| `DATABASE_URL` | the address+password of your Postgres (same as level 2) | project → **Connect** → connection string (`postgresql://…`) |
-| `NEON_AUTH_JWKS_URL` | the public keys your server uses to CHECK token signatures | project → **Auth** → JWKS URL |
-| `STACK_PUB_CLIENT_KEY` | the publishable key the login page uses to talk to Stack (`pck_…`, not secret) | project → **Auth** → publishable key |
-| `PUBLIC_URL` | your own server's address, so the login/OAuth pages advertise the right home | you know it after step 3: `https://<your-service>.onrender.com` |
+| `DATABASE_URL` | the address+password of your Postgres (same as level 2) | project → **Connect** |
+| `NEON_AUTH_BASE_URL` | your auth service's address — login, sign-up, and token-checking all live under it | project → **Auth** → Configuration (looks like `https://…neonauth….neon.tech/neondb/auth`) |
+| `PUBLIC_URL` | your own server's address, so its login/OAuth pages advertise the right home | after step 3: `https://<your-service>.onrender.com` |
 
-(You may see a `STACK_PROJECT_ID` mentioned in older material — you never
-need to find it: it lives inside the JWKS URL and the server reads it out
-automatically. The console shows the publishable key inside a code
-snippet as `NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY` — copy just the
-`pck_…` value.)
+(If your project still runs the **legacy Stack-based** Neon Auth — like
+the in-class demo from 2026-10-08 — see the appendix at the bottom.
+New projects can't choose legacy anymore;
+[docs/NEON-AUTH-TRANSITION.md](NEON-AUTH-TRANSITION.md) tells the story.)
 
 ## 3. Deploy (render.com — same moves as level 2)
 
 Use this template (the button — it keeps the lineage), Render → New →
-Blueprint → your fork; paste the **four variables** from the step-2
+Blueprint → your fork; paste the **three variables** from the step-2
 table when asked (for `PUBLIC_URL`, Render shows your service URL on
 the dashboard the moment the service exists — paste it and redeploy if
 you filled it last). Your MCP URL is
@@ -83,3 +79,12 @@ whatever it became: moods, catches, gems) stores data worth owning.
 handed to your Claude: *"help me add auth to my server following this
 guide."* One column, one function, three modes — and then your memory is
 **yours**.
+
+---
+
+## Appendix: legacy Stack-based projects only
+
+If your project was provisioned before Neon's move to Managed Better
+Auth, set `NEON_AUTH_JWKS_URL` and `STACK_PUB_CLIENT_KEY` (both on the
+old Auth page) instead of `NEON_AUTH_BASE_URL`. Everything else is
+identical; the server detects the mode by which variables exist.

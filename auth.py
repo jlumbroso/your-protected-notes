@@ -23,6 +23,12 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 ISSUER = os.environ.get("PUBLIC_URL", "https://your-protected-notes.onrender.com").rstrip("/")
+# Provider detection (2026-10-08: Neon moved new projects from Stack-based
+# "Neon Auth" to Managed Better Auth — docs/NEON-AUTH-TRANSITION.md).
+# NEON_AUTH_BASE_URL present => better_auth; otherwise legacy Stack.
+NEON_AUTH_BASE_URL = os.environ.get("NEON_AUTH_BASE_URL", "").rstrip("/")
+BETTER = bool(NEON_AUTH_BASE_URL)
+BA_COOKIE = "__Secure-neon-auth.session_token"
 # The Stack project id is embedded in the JWKS URL (.../projects/<id>/...).
 # Students could never find it in the console (it hides in SDK snippets), so
 # we derive it — one less thing to copy (known-problems #10).
@@ -36,6 +42,39 @@ GUEST_TOKEN = "guest-no-shelf"   # a DECLARED guest credential: completes the
 
 _codes: dict = {}     # code -> {tokens, code_challenge, redirect_uri, client_id, exp}
 _clients: dict = {}   # client_id -> {redirect_uris}
+
+
+def _better(path, payload=None, cookie=None, method=None):
+    """Managed Better Auth REST. Quirks (probe-verified 2026-10-08):
+    Origin header is REQUIRED; the session travels as a cookie; GET /token
+    exchanges session->EdDSA JWT (short-lived, ~15 min)."""
+    h = {"Content-Type": "application/json",
+         "Origin": NEON_AUTH_BASE_URL.split("/neondb")[0] if "/neondb" in NEON_AUTH_BASE_URL else NEON_AUTH_BASE_URL}
+    if cookie:
+        h["Cookie"] = f"{BA_COOKIE}={cookie}"
+    req = urllib.request.Request(NEON_AUTH_BASE_URL + path,
+                                 json.dumps(payload).encode() if payload is not None else None, h, method=method)
+    with urllib.request.urlopen(req) as r:
+        cookies = r.headers.get_all("Set-Cookie") or []
+        session = ""
+        for c in cookies:
+            first = c.split(";")[0]
+            if first.startswith(BA_COOKIE + "="):
+                session = first.split("=", 1)[1]
+        return json.loads(r.read() or b"{}"), session
+
+
+def _better_login(email, password, signup):
+    """Returns (jwt_access_token, session_refresh_token)."""
+    path = "/sign-up/email" if signup else "/sign-in/email"
+    payload = {"email": email, "password": password}
+    if signup:
+        payload["name"] = email.split("@")[0]
+    _, session = _better(path, payload)
+    if not session:
+        raise RuntimeError("no session cookie returned")
+    out, _ = _better("/token", cookie=session, method="GET")
+    return out["token"], session
 
 
 def _stack(path, payload=None, headers=None):
@@ -144,13 +183,18 @@ def register_oauth_routes(mcp):
                 f'{params["redirect_uri"]}{sep}code={code}&state={urllib.parse.quote(params["state"], safe="")}',
                 status_code=302)
         email, password = form.get("email", ""), form.get("password", "")
-        path = "/auth/password/sign-up" if form.get("mode") == "signup" else "/auth/password/sign-in"
-        payload = {"email": email, "password": password}
-        if form.get("mode") == "signup":
-            payload["verification_callback_url"] = ISSUER
+        signup = form.get("mode") == "signup"
         try:
-            tokens = _stack(path, payload)
-        except urllib.error.HTTPError as e:
+            if BETTER:
+                jwt_tok, session = _better_login(email, password, signup)
+                tokens = {"access_token": jwt_tok, "refresh_token": "ba:" + session}
+            else:
+                path = "/auth/password/sign-up" if signup else "/auth/password/sign-in"
+                payload = {"email": email, "password": password}
+                if signup:
+                    payload["verification_callback_url"] = ISSUER
+                tokens = _stack(path, payload)
+        except (urllib.error.HTTPError, RuntimeError) as e:
             # Parse Stack's error code so the human gets the TRUTH, not a shrug
             # (known-problems #1: the generic copy turned a created-account
             # retry into what read as rejection, live in class 2026-10-08).
@@ -158,9 +202,9 @@ def register_oauth_routes(mcp):
                 stack_code = json.loads(e.read()).get("code", "")
             except Exception:
                 stack_code = ""
-            if stack_code == "USER_EMAIL_ALREADY_EXISTS" or (path.endswith("sign-up") and e.code == 409):
+            if "EXISTS" in stack_code or (signup and getattr(e, "code", 0) == 409):
                 msg = "Good news: this email already has an account — press SIGN IN instead."
-            elif path.endswith("sign-in"):
+            elif not signup:
                 msg = "Sign-in failed — wrong password, or no account yet (then use sign up)."
             else:
                 msg = "Sign-up failed — password may be too weak (8+ characters), or try sign in."
@@ -193,10 +237,19 @@ def register_oauth_routes(mcp):
                                      "error_description": "PKCE verification failed"}, status_code=400)
             t = rec["tokens"]
             return JSONResponse({"access_token": t["access_token"],
-                                 "token_type": "bearer", "expires_in": 3600,
+                                 "token_type": "bearer",
+                                 "expires_in": 900 if BETTER else 3600,
                                  "refresh_token": t.get("refresh_token", "")})
         if grant == "refresh_token":
-            if form.get("refresh_token", "") == GUEST_TOKEN:
+            rt = form.get("refresh_token", "")
+            if BETTER and rt.startswith("ba:"):
+                try:
+                    out, _ = _better("/token", cookie=rt[3:], method="GET")
+                    return JSONResponse({"access_token": out["token"], "token_type": "bearer",
+                                         "expires_in": 900, "refresh_token": rt})
+                except Exception:
+                    return JSONResponse({"error": "invalid_grant"}, status_code=400)
+            if rt == GUEST_TOKEN:
                 return JSONResponse({"access_token": GUEST_TOKEN, "token_type": "bearer",
                                      "expires_in": 31536000, "refresh_token": GUEST_TOKEN})
             try:

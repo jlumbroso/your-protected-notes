@@ -86,3 +86,21 @@ it hides inside SDK snippets as `NEXT_PUBLIC_STACK_PROJECT_ID`.
 **Fix**: the id is embedded in the JWKS URL (`/projects/<id>/`), so the
 server now derives it — the variable is gone from render.yaml and
 COURSE-STEPS (4 variables, each findable on one console page).
+
+## 11. The console no longer matches older instructions — Neon moved to Better Auth
+**Symptom**: no "Auth" page with project id / publishable key; a
+"Better Auth" page with one URL instead.
+**Cause**: Neon closed legacy Stack-based Neon Auth to new users
+(existing projects keep working). Full story + verified differences:
+[NEON-AUTH-TRANSITION.md](NEON-AUTH-TRANSITION.md).
+**Do**: new projects → the 3-variable Better Auth path in COURSE-STEPS.
+
+## 12. Better Auth quirks (probe-verified)
+- REST calls REQUIRE an `Origin` header (`MISSING_ORIGIN` otherwise).
+- JWTs are **EdDSA** — verifiers listing only ES256/RS256 reject them.
+- JWTs live **15 minutes**; the session cookie
+  (`__Secure-neon-auth.session_token`) is the long-lived credential —
+  refresh = re-exchange at `GET {base}/token`.
+- `provision_neon_auth` still reports `table_name: users_sync`, but no
+  such table exists under Better Auth — the user table is
+  `neon_auth."user"`. (Reported upstream-worthy.)
