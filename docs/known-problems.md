@@ -79,3 +79,10 @@ once-per-project act, not server startup magic.
 test project holds `quotes` (level 2), `notes` (level 3), and
 `neon_auth.users_sync` in one `neondb`. Check the org switcher if a
 project is missing entirely — projects live in a specific organization.
+
+## 10. "I cannot find the STACK_PROJECT_ID" — FIXED (variable eliminated)
+**Symptom**: the Neon console never shows a field named Stack project id;
+it hides inside SDK snippets as `NEXT_PUBLIC_STACK_PROJECT_ID`.
+**Fix**: the id is embedded in the JWKS URL (`/projects/<id>/`), so the
+server now derives it — the variable is gone from render.yaml and
+COURSE-STEPS (4 variables, each findable on one console page).

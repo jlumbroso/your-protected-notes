@@ -23,7 +23,11 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, RedirectResponse
 
 ISSUER = os.environ.get("PUBLIC_URL", "https://your-protected-notes.onrender.com").rstrip("/")
-STACK_PROJECT_ID = os.environ.get("STACK_PROJECT_ID", "")
+# The Stack project id is embedded in the JWKS URL (.../projects/<id>/...).
+# Students could never find it in the console (it hides in SDK snippets), so
+# we derive it — one less thing to copy (known-problems #10).
+_m = __import__("re").search(r"/projects/([0-9a-fA-F-]+)/", os.environ.get("NEON_AUTH_JWKS_URL", ""))
+STACK_PROJECT_ID = os.environ.get("STACK_PROJECT_ID") or (_m.group(1) if _m else "")
 STACK_PUB_CLIENT_KEY = os.environ.get("STACK_PUB_CLIENT_KEY", "")
 
 GUEST_TOKEN = "guest-no-shelf"   # a DECLARED guest credential: completes the

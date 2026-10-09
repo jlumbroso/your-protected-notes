@@ -21,7 +21,11 @@ from mcp.server.fastmcp import Context, FastMCP
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 JWKS_URL = os.environ.get("NEON_AUTH_JWKS_URL")   # from `provision_neon_auth` / Neon console
-STACK_PROJECT_ID = os.environ.get("STACK_PROJECT_ID", "")
+# The Stack project id is embedded in the JWKS URL (.../projects/<id>/...).
+# Students could never find it in the console (it hides in SDK snippets), so
+# we derive it — one less thing to copy (known-problems #10).
+_m = __import__("re").search(r"/projects/([0-9a-fA-F-]+)/", os.environ.get("NEON_AUTH_JWKS_URL", ""))
+STACK_PROJECT_ID = os.environ.get("STACK_PROJECT_ID") or (_m.group(1) if _m else "")
 
 # Crockford Base32 (no I, L, O, U — unambiguous aloud, unlucky words excluded).
 # 4 chars = 32^4 = 1,048,576 petnames: plenty for a shelf of notes.
