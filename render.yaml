@@ -10,8 +10,12 @@ services:
     startCommand: python server.py
     envVars:
       - key: DATABASE_URL
-        sync: false
+        sync: false   # Neon -> your project -> Connect: the postgresql:// string
       - key: NEON_AUTH_JWKS_URL
-        sync: false
+        sync: false   # Neon -> your project -> Auth: "JWKS URL"
       - key: STACK_PROJECT_ID
-        sync: false
+        sync: false   # Neon -> Auth: the Stack project id (your user-base's identity)
+      - key: STACK_PUB_CLIENT_KEY
+        sync: false   # Neon -> Auth: the publishable client key (pck_...; needed by the login page)
+      - key: PUBLIC_URL
+        sync: false   # YOUR service URL, e.g. https://<your-service>.onrender.com — the login/OAuth endpoints advertise this

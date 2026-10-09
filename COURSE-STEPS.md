@@ -24,17 +24,31 @@ have to agree with the decisions; you have to be able to find them.
 
 ## 2. Get your database + enable Neon Auth
 
-1. neon.tech → your project (reuse level 2's!) → **Auth** → enable
-   (provider: Stack). You receive a **JWKS URL** and a project id.
-2. Notice the new `neon_auth.users_sync` table in your database: the user
-   list, synced *into* your own Postgres. You never write it; you may JOIN it.
-3. Copy, as in level 2, the **connection string**.
+1. neon.tech → your project (**reuse level 2's** — auth attaches to the
+   database you already have). In the sidebar: **Auth** → enable, with
+   provider **Stack** (Stack Auth is the identity service Neon wires in:
+   it stores your users, checks their passwords, signs their tokens).
+2. Notice the new `neon_auth.users_sync` table in your database: your
+   user list, synced *into* your own Postgres. You never write it; you
+   may JOIN it (that's how `user_status` shows an email).
+3. The Auth page now shows everything you'll copy in step 3. In plain
+   words:
+
+| Variable | What it actually is | Where to copy it |
+|---|---|---|
+| `DATABASE_URL` | the address+password of your Postgres (same as level 2) | project → **Connect** → connection string (`postgresql://…`) |
+| `NEON_AUTH_JWKS_URL` | the public keys your server uses to CHECK token signatures | project → **Auth** → JWKS URL |
+| `STACK_PROJECT_ID` | which user-base to trust — the id of YOUR Stack project | project → **Auth** → project id |
+| `STACK_PUB_CLIENT_KEY` | the publishable key the login page uses to talk to Stack (`pck_…`, not secret) | project → **Auth** → publishable key |
+| `PUBLIC_URL` | your own server's address, so the login/OAuth pages advertise the right home | you know it after step 3: `https://<your-service>.onrender.com` |
 
 ## 3. Deploy (render.com — same moves as level 2)
 
 Use this template (the button — it keeps the lineage), Render → New →
-Blueprint → your fork; paste `DATABASE_URL`, `NEON_AUTH_JWKS_URL`, and
-`STACK_PROJECT_ID` when asked. Your MCP URL is
+Blueprint → your fork; paste the **five variables** from the step-2
+table when asked (for `PUBLIC_URL`, Render shows your service URL on
+the dashboard the moment the service exists — paste it and redeploy if
+you filled it last). Your MCP URL is
 `https://<your-service>.onrender.com/mcp`.
 
 ## 4. Feel the difference
