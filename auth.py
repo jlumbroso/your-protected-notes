@@ -147,8 +147,19 @@ def register_oauth_routes(mcp):
         try:
             tokens = _stack(path, payload)
         except urllib.error.HTTPError as e:
-            msg = "Sign-in failed — check email/password (or use sign up)." \
-                if path.endswith("sign-in") else "Sign-up failed (password too weak, or account exists — try sign in)."
+            # Parse Stack's error code so the human gets the TRUTH, not a shrug
+            # (known-problems #1: the generic copy turned a created-account
+            # retry into what read as rejection, live in class 2026-10-08).
+            try:
+                stack_code = json.loads(e.read()).get("code", "")
+            except Exception:
+                stack_code = ""
+            if stack_code == "USER_EMAIL_ALREADY_EXISTS" or (path.endswith("sign-up") and e.code == 409):
+                msg = "Good news: this email already has an account — press SIGN IN instead."
+            elif path.endswith("sign-in"):
+                msg = "Sign-in failed — wrong password, or no account yet (then use sign up)."
+            else:
+                msg = "Sign-up failed — password may be too weak (8+ characters), or try sign in."
             return _render_form(params, err=msg)
         code = secrets.token_urlsafe(24)
         _codes[code] = {"tokens": tokens,

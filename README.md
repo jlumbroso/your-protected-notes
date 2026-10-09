@@ -22,6 +22,7 @@ no I/L/O/U, readable aloud), unique per shelf.
 - **Already have a server storing in Neon?**
   [docs/RETROFIT-NEON-AUTH.md](docs/RETROFIT-NEON-AUTH.md) is written to be
   handed to your Claude.
+- **When something misbehaves**: [docs/known-problems.md](docs/known-problems.md) — the honest ledger (symptom → cause → what to do).
 - **Open**: how the token reaches the server from claude.ai ([ADR-0002](docs/adr/0002-how-does-the-token-reach-the-server.md) — spike pending).
 
 *Founded 2026-10-08 from
